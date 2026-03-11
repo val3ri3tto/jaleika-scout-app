@@ -223,13 +223,13 @@ export default function PlayerForm() {
         </div>
       )}
 
-      {/* Create first observation for new player */}
-      {isNew && !currentObs && (
+      {/* Create observation when none exists */}
+      {!currentObs && (
         <div className="obs-start">
           <button className="obs-start__btn" onClick={handleNewObservation}>
             Inizia Osservazione
           </button>
-          <p>Compila l'anagrafica e premi per iniziare la valutazione</p>
+          <p>{isNew ? 'Compila l\'anagrafica e premi per iniziare la valutazione' : 'Aggiungi una nuova osservazione per questo giocatore'}</p>
         </div>
       )}
 
