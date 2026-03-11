@@ -1,5 +1,349 @@
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { usePlayer } from '../db/usePlayer'
+import FormSection from '../components/FormSection'
+import BallRating from '../components/BallRating'
+import './PlayerForm.css'
+
+const RUOLI = ['Portiere', 'Difensore', 'Centrocampista', 'Attaccante']
+const PIEDI = ['Destro', 'Sinistro', 'Entrambi']
+const VALUTAZIONI = [
+  { value: 'Da rivedere', desc: 'Serve un\'altra osservazione', color: '#6b7b8a' },
+  { value: 'Interessante', desc: 'Potenziale ma tecnica da migliorare', color: '#ff9800' },
+  { value: 'Alto potenziale', desc: 'Ottima tecnica ma testa da indirizzare', color: '#2196f3' },
+  { value: 'Top', desc: 'Pronto per allenamenti top', color: '#4caf50' },
+]
+
+const TIPSS = [
+  {
+    key: 'tecnica', label: 'T - Tecnica',
+    items: [
+      { key: 'controllo', label: 'Controllo palla / primo tocco' },
+      { key: 'passaggio', label: 'Passaggio' },
+      { key: 'dribbling', label: 'Dribbling / 1v1' },
+      { key: 'tiro', label: 'Tiro' },
+    ]
+  },
+  {
+    key: 'intelligenza', label: 'I - Intelligenza',
+    items: [
+      { key: 'lettura', label: 'Lettura del gioco' },
+      { key: 'posizionamento', label: 'Posizionamento' },
+      { key: 'decisioni', label: 'Decisioni' },
+    ]
+  },
+  {
+    key: 'personalita', label: 'P - Personalita',
+    items: [
+      { key: 'reazione', label: 'Reazione agli errori' },
+      { key: 'spirito', label: 'Spirito competitivo' },
+      { key: 'atteggiamento', label: 'Atteggiamento con compagni e avversari' },
+    ]
+  },
+  {
+    key: 'velocita', label: 'S - Velocita',
+    items: [
+      { key: 'esecuzione', label: 'Rapidita di esecuzione' },
+      { key: 'pura', label: 'Velocita pura' },
+    ]
+  },
+  {
+    key: 'struttura', label: 'S - Struttura',
+    items: [
+      { key: 'coordinazione', label: 'Coordinazione motoria' },
+      { key: 'resistenza', label: 'Resistenza / tenuta nella partita' },
+    ]
+  },
+]
+
+function emptyObservation(playerId) {
+  const obs = {
+    playerId,
+    dataOsservazione: new Date().toISOString().split('T')[0],
+    squadraCasa: '',
+    squadraOspite: '',
+    competizione: '',
+    ambienteFamiliare: '',
+    notePersona: '',
+    noteGenerali: '',
+    valutazioneSintetica: '',
+  }
+  TIPSS.forEach(dim => {
+    obs[`${dim.key}_commento`] = ''
+    dim.items.forEach(item => {
+      obs[`${dim.key}_${item.key}Voto`] = 0
+      obs[`${dim.key}_${item.key}Nota`] = ''
+    })
+  })
+  return obs
+}
+
 export default function PlayerForm() {
-  return <div style={{ padding: 24 }}>
-    <h1>Scheda Giocatore</h1>
-  </div>
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const isNew = id === 'new'
+  const { player, observations, loading, savePlayer, saveObservation } = usePlayer(isNew ? null : id)
+
+  const [playerData, setPlayerData] = useState({
+    nome: '', cognome: '', dataNascita: '', squadra: '', ruolo: '', piedePreferito: '', foto: ''
+  })
+  const [currentObs, setCurrentObs] = useState(null)
+  const [selectedObsIndex, setSelectedObsIndex] = useState(0)
+  const [saved, setSaved] = useState(false)
+
+  const saveTimeout = useRef(null)
+
+  useEffect(() => {
+    if (player) {
+      setPlayerData(player)
+    }
+  }, [player])
+
+  useEffect(() => {
+    if (!isNew && observations.length > 0) {
+      setCurrentObs(observations[selectedObsIndex] || observations[0])
+    }
+  }, [observations, selectedObsIndex, isNew])
+
+  const autoSave = useCallback((pData, obsData) => {
+    if (saveTimeout.current) clearTimeout(saveTimeout.current)
+    saveTimeout.current = setTimeout(async () => {
+      if (pData.nome || pData.cognome) {
+        const pId = await savePlayer(pData)
+        if (obsData && pId) {
+          await saveObservation({ ...obsData, playerId: pId })
+        }
+        setSaved(true)
+        setTimeout(() => setSaved(false), 1500)
+      }
+    }, 800)
+  }, [savePlayer, saveObservation])
+
+  const updatePlayer = (field, value) => {
+    const updated = { ...playerData, [field]: value }
+    setPlayerData(updated)
+    autoSave(updated, currentObs)
+  }
+
+  const updateObs = (field, value) => {
+    const updated = { ...currentObs, [field]: value }
+    setCurrentObs(updated)
+    autoSave(playerData, updated)
+  }
+
+  const handleNewObservation = async () => {
+    if (!playerData.id && (playerData.nome || playerData.cognome)) {
+      const pId = await savePlayer(playerData)
+      const obs = emptyObservation(pId)
+      const obsId = await saveObservation(obs)
+      setCurrentObs({ ...obs, id: obsId })
+      setPlayerData(prev => ({ ...prev, id: pId }))
+    } else if (playerData.id) {
+      const obs = emptyObservation(playerData.id)
+      const obsId = await saveObservation(obs)
+      setCurrentObs({ ...obs, id: obsId })
+    }
+  }
+
+  const handlePhotoCapture = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onloadend = () => updatePlayer('foto', reader.result)
+    reader.readAsDataURL(file)
+  }
+
+  if (loading) return <div className="home-loading">Caricamento...</div>
+
+  return (
+    <div className="player-form">
+      <header className="player-form__header">
+        <button className="player-form__back" onClick={() => navigate('/')}>
+          &#8592; Lista
+        </button>
+        <h1>{isNew ? 'Nuovo Giocatore' : `${playerData.nome} ${playerData.cognome}`}</h1>
+        {saved && <span className="player-form__saved">Salvato</span>}
+      </header>
+
+      {/* ANAGRAFICA */}
+      <FormSection title="Anagrafica">
+        <div className="form-row">
+          <div className="form-field">
+            <label>Nome</label>
+            <input value={playerData.nome} onChange={e => updatePlayer('nome', e.target.value)} placeholder="Nome" />
+          </div>
+          <div className="form-field">
+            <label>Cognome</label>
+            <input value={playerData.cognome} onChange={e => updatePlayer('cognome', e.target.value)} placeholder="Cognome" />
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-field">
+            <label>Data di nascita</label>
+            <input type="date" value={playerData.dataNascita} onChange={e => updatePlayer('dataNascita', e.target.value)} />
+          </div>
+          <div className="form-field">
+            <label>Squadra</label>
+            <input value={playerData.squadra} onChange={e => updatePlayer('squadra', e.target.value)} placeholder="Squadra" />
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-field">
+            <label>Ruolo</label>
+            <select value={playerData.ruolo} onChange={e => updatePlayer('ruolo', e.target.value)}>
+              <option value="">Seleziona ruolo</option>
+              {RUOLI.map(r => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
+          <div className="form-field">
+            <label>Piede preferito</label>
+            <select value={playerData.piedePreferito} onChange={e => updatePlayer('piedePreferito', e.target.value)}>
+              <option value="">Seleziona</option>
+              {PIEDI.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="form-field">
+          <label>Foto (opzionale)</label>
+          <input type="file" accept="image/*" capture="environment" onChange={handlePhotoCapture} />
+        </div>
+      </FormSection>
+
+      {/* OBSERVATION SELECTOR */}
+      {!isNew && observations.length > 0 && (
+        <div className="obs-selector">
+          <span>Osservazione:</span>
+          <select value={selectedObsIndex} onChange={e => setSelectedObsIndex(Number(e.target.value))}>
+            {observations.map((obs, i) => (
+              <option key={obs.id} value={i}>{obs.dataOsservazione} - {obs.competizione || 'Partita'}</option>
+            ))}
+          </select>
+          <button className="obs-selector__new" onClick={handleNewObservation}>+ Nuova</button>
+        </div>
+      )}
+
+      {/* Create first observation for new player */}
+      {isNew && !currentObs && (
+        <div className="obs-start">
+          <button className="obs-start__btn" onClick={handleNewObservation}>
+            Inizia Osservazione
+          </button>
+          <p>Compila l'anagrafica e premi per iniziare la valutazione</p>
+        </div>
+      )}
+
+      {currentObs && (
+        <>
+          {/* INFO PARTITA */}
+          <FormSection title="Info Partita">
+            <div className="form-row">
+              <div className="form-field">
+                <label>Data osservazione</label>
+                <input type="date" value={currentObs.dataOsservazione} onChange={e => updateObs('dataOsservazione', e.target.value)} />
+              </div>
+              <div className="form-field">
+                <label>Competizione / Torneo</label>
+                <input value={currentObs.competizione} onChange={e => updateObs('competizione', e.target.value)} placeholder="Es. Campionato Esordienti" />
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-field">
+                <label>Squadra casa</label>
+                <input value={currentObs.squadraCasa} onChange={e => updateObs('squadraCasa', e.target.value)} placeholder="Squadra casa" />
+              </div>
+              <div className="form-field">
+                <label>Squadra ospite</label>
+                <input value={currentObs.squadraOspite} onChange={e => updateObs('squadraOspite', e.target.value)} placeholder="Squadra ospite" />
+              </div>
+            </div>
+          </FormSection>
+
+          {/* TIPSS */}
+          {TIPSS.map(dim => (
+            <FormSection key={dim.key} title={dim.label} defaultOpen={false}>
+              {dim.items.map(item => (
+                <div key={item.key} className="tipss-item">
+                  <div className="tipss-item__header">
+                    <span>{item.label}</span>
+                    <BallRating
+                      value={currentObs[`${dim.key}_${item.key}Voto`] || 0}
+                      onChange={v => updateObs(`${dim.key}_${item.key}Voto`, v)}
+                    />
+                  </div>
+                  <input
+                    className="tipss-item__note"
+                    placeholder="Nota (opzionale)"
+                    value={currentObs[`${dim.key}_${item.key}Nota`] || ''}
+                    onChange={e => updateObs(`${dim.key}_${item.key}Nota`, e.target.value)}
+                  />
+                </div>
+              ))}
+              <div className="form-field">
+                <label>Commento generale - {dim.label}</label>
+                <textarea
+                  value={currentObs[`${dim.key}_commento`] || ''}
+                  onChange={e => updateObs(`${dim.key}_commento`, e.target.value)}
+                  placeholder="Impressioni generali su questa dimensione..."
+                />
+              </div>
+            </FormSection>
+          ))}
+
+          {/* EXTRA CAMPO */}
+          <FormSection title="Extra-campo" defaultOpen={false}>
+            <div className="form-field">
+              <label>Ambiente familiare</label>
+              <textarea
+                value={currentObs.ambienteFamiliare || ''}
+                onChange={e => updateObs('ambienteFamiliare', e.target.value)}
+                placeholder="Es. genitori presenti, padre molto coinvolto ma rispettoso..."
+              />
+            </div>
+            <div className="form-field">
+              <label>Note sulla persona</label>
+              <textarea
+                value={currentObs.notePersona || ''}
+                onChange={e => updateObs('notePersona', e.target.value)}
+                placeholder="Es. ragazzino timido ma concentratissimo..."
+              />
+            </div>
+          </FormSection>
+
+          {/* NOTE GENERALI */}
+          <FormSection title="Note Generali" defaultOpen={false}>
+            <div className="form-field">
+              <textarea
+                value={currentObs.noteGenerali || ''}
+                onChange={e => updateObs('noteGenerali', e.target.value)}
+                placeholder="Momenti chiave, impressioni d'insieme, potenziale percepito..."
+                style={{ minHeight: 120 }}
+              />
+            </div>
+          </FormSection>
+
+          {/* VALUTAZIONE SINTETICA */}
+          <FormSection title="Valutazione Sintetica">
+            <div className="valutazione-grid">
+              {VALUTAZIONI.map(v => (
+                <button
+                  key={v.value}
+                  className={`valutazione-btn ${currentObs.valutazioneSintetica === v.value ? 'active' : ''}`}
+                  style={currentObs.valutazioneSintetica === v.value ? { backgroundColor: v.color, borderColor: v.color } : {}}
+                  onClick={() => updateObs('valutazioneSintetica', v.value)}
+                >
+                  <strong>{v.value}</strong>
+                  <span>{v.desc}</span>
+                </button>
+              ))}
+            </div>
+          </FormSection>
+
+          {/* EXPORT PDF placeholder */}
+          <button className="export-btn" onClick={() => {}}>
+            Esporta PDF
+          </button>
+        </>
+      )}
+    </div>
+  )
 }

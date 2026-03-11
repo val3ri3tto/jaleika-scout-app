@@ -1,0 +1,33 @@
+.form-section {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.form-section__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 18px;
+  padding: 16px 20px;
+  cursor: pointer;
+  color: var(--accent);
+  user-select: none;
+}
+
+.form-section__arrow {
+  font-size: 14px;
+  transition: transform 0.2s;
+}
+
+.form-section__arrow.open {
+  transform: rotate(180deg);
+}
+
+.form-section__content {
+  padding: 0 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

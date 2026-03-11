@@ -1,0 +1,23 @@
+.ball-rating {
+  display: flex;
+  gap: 4px;
+}
+
+.ball-rating__ball {
+  font-size: 24px;
+  background: none;
+  padding: 4px;
+  border-radius: 50%;
+  opacity: 0.25;
+  filter: grayscale(1);
+  transition: all 0.15s;
+}
+
+.ball-rating__ball.active {
+  opacity: 1;
+  filter: grayscale(0);
+}
+
+.ball-rating__ball:active {
+  transform: scale(1.2);
+}
