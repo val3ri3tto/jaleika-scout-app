@@ -166,3 +166,17 @@
   border-radius: var(--radius);
   margin-top: 8px;
 }
+
+/* Delete player */
+.delete-player-btn {
+  display: block;
+  width: 100%;
+  background: transparent;
+  color: #e74c3c;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 14px;
+  border: 1px solid #e74c3c;
+  border-radius: var(--radius);
+  margin-top: 24px;
+}

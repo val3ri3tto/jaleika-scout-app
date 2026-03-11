@@ -83,7 +83,7 @@ export default function PlayerForm() {
   const { id } = useParams()
   const navigate = useNavigate()
   const isNew = id === 'new'
-  const { player, observations, loading, savePlayer, saveObservation } = usePlayer(isNew ? null : id)
+  const { player, observations, loading, savePlayer, saveObservation, deletePlayer } = usePlayer(isNew ? null : id)
 
   const [playerData, setPlayerData] = useState({
     nome: '', cognome: '', dataNascita: '', squadra: '', ruolo: '', piedePreferito: '', foto: ''
@@ -344,6 +344,21 @@ export default function PlayerForm() {
             Esporta PDF
           </button>
         </>
+      )}
+
+      {/* DELETE PLAYER */}
+      {!isNew && playerData.id && (
+        <button
+          className="delete-player-btn"
+          onClick={async () => {
+            if (window.confirm(`Vuoi davvero eliminare ${playerData.nome} ${playerData.cognome} e tutte le sue osservazioni?`)) {
+              await deletePlayer(playerData.id)
+              navigate('/')
+            }
+          }}
+        >
+          Elimina giocatore
+        </button>
       )}
     </div>
   )

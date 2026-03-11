@@ -54,5 +54,11 @@ export function usePlayer(id) {
     setObservations(prev => prev.filter(o => o.id !== obsId))
   }, [])
 
-  return { player, observations, loading, savePlayer, saveObservation, deleteObservation }
+  const deletePlayer = useCallback(async (playerId) => {
+    const pid = Number(playerId)
+    await db.observations.where('playerId').equals(pid).delete()
+    await db.players.delete(pid)
+  }, [])
+
+  return { player, observations, loading, savePlayer, saveObservation, deleteObservation, deletePlayer }
 }
