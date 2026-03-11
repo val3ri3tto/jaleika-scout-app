@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { usePlayer } from '../db/usePlayer'
 import FormSection from '../components/FormSection'
 import BallRating from '../components/BallRating'
+import { exportPDF } from '../utils/pdfExport'
 import './PlayerForm.css'
 
 const RUOLI = ['Portiere', 'Difensore', 'Centrocampista', 'Attaccante']
@@ -338,8 +339,8 @@ export default function PlayerForm() {
             </div>
           </FormSection>
 
-          {/* EXPORT PDF placeholder */}
-          <button className="export-btn" onClick={() => {}}>
+          {/* EXPORT PDF */}
+          <button className="export-btn" onClick={() => exportPDF(playerData, currentObs)}>
             Esporta PDF
           </button>
         </>
