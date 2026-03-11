@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:www.scoutcalcio.it)",
+      "WebFetch(domain:footballexplorer.it)",
+      "WebFetch(domain:www.calcioscout.com)",
+      "WebFetch(domain:grassrootstoglory.co.uk)",
+      "WebFetch(domain:alicantefootballacademy.com)",
+      "WebFetch(domain:www.socceredu.com)",
+      "WebFetch(domain:www.progettocalcio.com)",
+      "Bash(npm create vite@latest . -- --template react 2)",
+      "Bash(1:*)",
+      "Bash(npx create-vite@latest . --template react --force)",
+      "Bash(npx create-vite@latest . --template react)",
+      "Bash(cp -r \"C:/Users/Valerio/Desktop/temp-vite/jaleika/\"* \"C:/Users/Valerio/Desktop/App Osservazione/\")",
+      "Bash(cp \"C:/Users/Valerio/Desktop/temp-vite/jaleika/\".* \"C:/Users/Valerio/Desktop/App Osservazione/\")",
+      "Bash(rm -rf \"C:/Users/Valerio/Desktop/temp-vite\")",
+      "Bash(npm install)",
+      "Bash(npm install react-router-dom dexie jspdf)",
+      "Bash(npm install -D vite-plugin-pwa)",
+      "Bash(npx vite --host)"
+    ]
+  }
+}
