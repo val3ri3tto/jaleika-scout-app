@@ -35,7 +35,7 @@ const TIPSS_GIOCATORE = [
     ]
   },
   {
-    key: 'personalita', label: 'Personalita',
+    key: 'personalita', label: 'Personalità',
     items: [
       { key: 'reazione', label: 'Reazione errori' },
       { key: 'spirito', label: 'Spirito competitivo' },
@@ -43,10 +43,10 @@ const TIPSS_GIOCATORE = [
     ]
   },
   {
-    key: 'velocita', label: 'Velocita',
+    key: 'velocita', label: 'Velocità',
     items: [
-      { key: 'esecuzione', label: 'Rapidita esecuzione' },
-      { key: 'pura', label: 'Velocita pura' },
+      { key: 'esecuzione', label: 'Rapidità esecuzione' },
+      { key: 'pura', label: 'Velocità pura' },
     ]
   },
   {
@@ -79,7 +79,7 @@ const TIPSS_PORTIERE = [
     ]
   },
   {
-    key: 'personalita', label: 'Personalita',
+    key: 'personalita', label: 'Personalità',
     items: [
       { key: 'reazione', label: 'Reazione errori' },
       { key: 'coraggio', label: 'Coraggio' },
@@ -88,10 +88,10 @@ const TIPSS_PORTIERE = [
     ]
   },
   {
-    key: 'velocita', label: 'Reattivita',
+    key: 'velocita', label: 'Reattività',
     items: [
       { key: 'riflessi', label: 'Riflessi' },
-      { key: 'esplosivita', label: 'Esplosivita' },
+      { key: 'esplosivita', label: 'Esplosività' },
       { key: 'laterali', label: 'Movimenti laterali' },
     ]
   },
@@ -99,7 +99,7 @@ const TIPSS_PORTIERE = [
     key: 'struttura', label: 'Struttura',
     items: [
       { key: 'coordinazione', label: 'Coordinazione' },
-      { key: 'flessibilita', label: 'Flessibilita' },
+      { key: 'flessibilita', label: 'Flessibilità' },
       { key: 'fisica', label: 'Struttura fisica' },
     ]
   },
