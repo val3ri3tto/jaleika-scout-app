@@ -397,7 +397,7 @@ export default function PlayerForm() {
           </FormSection>
 
           {/* EXPORT PDF */}
-          <button className="export-btn" onClick={() => exportPDF(playerData, currentObs)}>
+          <button className="export-btn" onClick={async () => await exportPDF(playerData, currentObs)}>
             Esporta PDF
           </button>
         </>

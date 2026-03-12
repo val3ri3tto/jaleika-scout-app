@@ -1,5 +1,21 @@
 import jsPDF from 'jspdf'
 
+function loadLogoAsBase64() {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = img.naturalWidth
+      canvas.height = img.naturalHeight
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0)
+      resolve(canvas.toDataURL('image/png'))
+    }
+    img.onerror = () => resolve(null)
+    img.src = '/Logotipo_arco.svg'
+  })
+}
+
 const COLORS = {
   bg: [27, 32, 46],
   accent: [243, 230, 6],
@@ -205,27 +221,33 @@ function drawBalls(doc, count, x, y) {
   }
 }
 
-export function exportPDF(player, obs) {
+export async function exportPDF(player, obs) {
   const TIPSS_CONFIG = getTIPSS(player.ruolo)
   const doc = new jsPDF('p', 'mm', 'a4')
   const pageW = 210
-  let y = 20
+  let y = 15
 
   // Background
   doc.setFillColor(...COLORS.bg)
   doc.rect(0, 0, 210, 297, 'F')
 
+  // Logo
+  const logoData = await loadLogoAsBase64()
+  if (logoData) {
+    doc.addImage(logoData, 'PNG', 15, y - 5, 40, 20)
+  }
+
   // Header
   doc.setTextColor(...COLORS.accent)
   doc.setFontSize(22)
   doc.setFont('helvetica', 'bold')
-  doc.text('JALEIKA PLAYER LAB', 15, y)
-  y += 6
+  doc.text('JALEIKA PLAYER LAB', 60, y + 4)
+  y += 10
   doc.setFontSize(12)
   doc.setFont('helvetica', 'normal')
   doc.setTextColor(...COLORS.gray)
-  doc.text('Report Osservazione', 15, y)
-  y += 10
+  doc.text('Report Osservazione', 60, y)
+  y += 12
 
   // Divider
   doc.setDrawColor(...COLORS.accent)
