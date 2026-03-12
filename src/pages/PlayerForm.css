@@ -180,3 +180,72 @@
   border-radius: var(--radius);
   margin-top: 24px;
 }
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 600px) {
+  .player-form {
+    padding: 16px 12px;
+    padding-bottom: 80px;
+  }
+
+  .player-form__header {
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .player-form__header h1 {
+    font-size: 18px;
+  }
+
+  .player-form__back {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .obs-selector {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  .obs-selector select {
+    min-width: 0;
+  }
+
+  .obs-selector__new {
+    width: 100%;
+    text-align: center;
+    padding: 10px;
+  }
+
+  .obs-start__btn {
+    font-size: 16px;
+    padding: 14px 28px;
+  }
+
+  .tipss-item__header {
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 14px;
+  }
+
+  .valutazione-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .valutazione-btn {
+    padding: 14px;
+  }
+
+  .export-btn {
+    font-size: 16px;
+    padding: 16px;
+  }
+}

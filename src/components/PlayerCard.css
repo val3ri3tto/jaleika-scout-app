@@ -62,3 +62,24 @@
   color: #fff;
   white-space: nowrap;
 }
+
+@media (max-width: 600px) {
+  .player-card {
+    gap: 12px;
+    padding: 12px 14px;
+  }
+
+  .player-card__avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 15px;
+  }
+
+  .player-card__info h3 {
+    font-size: 16px;
+  }
+
+  .player-card__info p {
+    font-size: 13px;
+  }
+}
