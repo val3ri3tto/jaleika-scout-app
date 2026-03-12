@@ -15,7 +15,7 @@ const VALUTAZIONI = [
   { value: 'Top', desc: 'Pronto per allenamenti top', color: '#4caf50' },
 ]
 
-const TIPSS = [
+const TIPSS_GIOCATORE = [
   {
     key: 'tecnica', label: 'T - Tecnica',
     items: [
@@ -57,7 +57,58 @@ const TIPSS = [
   },
 ]
 
-function emptyObservation(playerId) {
+const TIPSS_PORTIERE = [
+  {
+    key: 'tecnica', label: 'T - Tecnica',
+    items: [
+      { key: 'presa', label: 'Presa e bloccaggio' },
+      { key: 'tuffo', label: 'Tuffo e parata' },
+      { key: 'uscite', label: 'Uscita alta / presa aerea' },
+      { key: 'piedi', label: 'Rinvio e gioco con i piedi' },
+      { key: 'rilancio', label: 'Rilancio con le mani' },
+    ]
+  },
+  {
+    key: 'intelligenza', label: 'I - Intelligenza Tattica',
+    items: [
+      { key: 'posizionamento', label: 'Posizionamento e angolazione' },
+      { key: 'lettura', label: 'Lettura del gioco / anticipo' },
+      { key: 'area', label: 'Gestione dell\'area' },
+      { key: 'organizzazione', label: 'Organizzazione difensiva / comunicazione' },
+    ]
+  },
+  {
+    key: 'personalita', label: 'P - Personalita',
+    items: [
+      { key: 'reazione', label: 'Reazione agli errori' },
+      { key: 'coraggio', label: 'Coraggio e determinazione' },
+      { key: 'leadership', label: 'Leadership e comunicazione' },
+      { key: 'concentrazione', label: 'Concentrazione' },
+    ]
+  },
+  {
+    key: 'velocita', label: 'S - Reattivita',
+    items: [
+      { key: 'riflessi', label: 'Riflessi' },
+      { key: 'esplosivita', label: 'Esplosivita' },
+      { key: 'laterali', label: 'Rapidita nei movimenti laterali' },
+    ]
+  },
+  {
+    key: 'struttura', label: 'S - Struttura',
+    items: [
+      { key: 'coordinazione', label: 'Coordinazione motoria' },
+      { key: 'flessibilita', label: 'Flessibilita e agilita' },
+      { key: 'fisica', label: 'Struttura fisica / potenziale altezza' },
+    ]
+  },
+]
+
+function getTIPSS(ruolo) {
+  return ruolo === 'Portiere' ? TIPSS_PORTIERE : TIPSS_GIOCATORE
+}
+
+function emptyObservation(playerId, ruolo) {
   const obs = {
     playerId,
     dataOsservazione: new Date().toISOString().split('T')[0],
@@ -69,11 +120,17 @@ function emptyObservation(playerId) {
     noteGenerali: '',
     valutazioneSintetica: '',
   }
-  TIPSS.forEach(dim => {
-    obs[`${dim.key}_commento`] = ''
-    dim.items.forEach(item => {
-      obs[`${dim.key}_${item.key}Voto`] = 0
-      obs[`${dim.key}_${item.key}Nota`] = ''
+  // Initialize fields for BOTH configs so data is never lost if role changes
+  const allConfigs = [TIPSS_GIOCATORE, TIPSS_PORTIERE]
+  allConfigs.forEach(config => {
+    config.forEach(dim => {
+      obs[`${dim.key}_commento`] = obs[`${dim.key}_commento`] || ''
+      dim.items.forEach(item => {
+        const votoKey = `${dim.key}_${item.key}Voto`
+        const notaKey = `${dim.key}_${item.key}Nota`
+        if (!(votoKey in obs)) obs[votoKey] = 0
+        if (!(notaKey in obs)) obs[notaKey] = ''
+      })
     })
   })
   return obs
@@ -135,12 +192,12 @@ export default function PlayerForm() {
   const handleNewObservation = async () => {
     if (!playerData.id && (playerData.nome || playerData.cognome)) {
       const pId = await savePlayer(playerData)
-      const obs = emptyObservation(pId)
+      const obs = emptyObservation(pId, playerData.ruolo)
       const obsId = await saveObservation(obs)
       setCurrentObs({ ...obs, id: obsId })
       setPlayerData(prev => ({ ...prev, id: pId }))
     } else if (playerData.id) {
-      const obs = emptyObservation(playerData.id)
+      const obs = emptyObservation(playerData.id, playerData.ruolo)
       const obsId = await saveObservation(obs)
       setCurrentObs({ ...obs, id: obsId })
     }
@@ -260,7 +317,7 @@ export default function PlayerForm() {
           </FormSection>
 
           {/* TIPSS */}
-          {TIPSS.map(dim => (
+          {getTIPSS(playerData.ruolo).map(dim => (
             <FormSection key={dim.key} title={dim.label} defaultOpen={false}>
               {dim.items.map(item => (
                 <div key={item.key} className="tipss-item">

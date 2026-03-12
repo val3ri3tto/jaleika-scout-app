@@ -16,7 +16,7 @@ const VALUTAZIONE_COLORS = {
   'Top': [76, 175, 80],
 }
 
-const TIPSS_CONFIG = [
+const TIPSS_GIOCATORE = [
   {
     key: 'tecnica', label: 'Tecnica',
     items: [
@@ -58,14 +58,65 @@ const TIPSS_CONFIG = [
   },
 ]
 
+const TIPSS_PORTIERE = [
+  {
+    key: 'tecnica', label: 'Tecnica',
+    items: [
+      { key: 'presa', label: 'Presa / bloccaggio' },
+      { key: 'tuffo', label: 'Tuffo / parata' },
+      { key: 'uscite', label: 'Uscita alta' },
+      { key: 'piedi', label: 'Gioco con i piedi' },
+      { key: 'rilancio', label: 'Rilancio mani' },
+    ]
+  },
+  {
+    key: 'intelligenza', label: 'Intelligenza',
+    items: [
+      { key: 'posizionamento', label: 'Posizionamento' },
+      { key: 'lettura', label: 'Lettura gioco' },
+      { key: 'area', label: 'Gestione area' },
+      { key: 'organizzazione', label: 'Org. difensiva' },
+    ]
+  },
+  {
+    key: 'personalita', label: 'Personalita',
+    items: [
+      { key: 'reazione', label: 'Reazione errori' },
+      { key: 'coraggio', label: 'Coraggio' },
+      { key: 'leadership', label: 'Leadership' },
+      { key: 'concentrazione', label: 'Concentrazione' },
+    ]
+  },
+  {
+    key: 'velocita', label: 'Reattivita',
+    items: [
+      { key: 'riflessi', label: 'Riflessi' },
+      { key: 'esplosivita', label: 'Esplosivita' },
+      { key: 'laterali', label: 'Movimenti laterali' },
+    ]
+  },
+  {
+    key: 'struttura', label: 'Struttura',
+    items: [
+      { key: 'coordinazione', label: 'Coordinazione' },
+      { key: 'flessibilita', label: 'Flessibilita' },
+      { key: 'fisica', label: 'Struttura fisica' },
+    ]
+  },
+]
+
+function getTIPSS(ruolo) {
+  return ruolo === 'Portiere' ? TIPSS_PORTIERE : TIPSS_GIOCATORE
+}
+
 function getDimAvg(obs, dimKey, items) {
   const votes = items.map(i => obs[`${dimKey}_${i.key}Voto`] || 0).filter(v => v > 0)
   if (votes.length === 0) return 0
   return votes.reduce((a, b) => a + b, 0) / votes.length
 }
 
-function drawRadar(doc, obs, x, y, radius) {
-  const dims = TIPSS_CONFIG.map(d => ({
+function drawRadar(doc, obs, x, y, radius, tipssConfig) {
+  const dims = tipssConfig.map(d => ({
     label: d.label,
     value: getDimAvg(obs, d.key, d.items)
   }))
@@ -155,6 +206,7 @@ function drawBalls(doc, count, x, y) {
 }
 
 export function exportPDF(player, obs) {
+  const TIPSS_CONFIG = getTIPSS(player.ruolo)
   const doc = new jsPDF('p', 'mm', 'a4')
   const pageW = 210
   let y = 20
@@ -232,7 +284,7 @@ export function exportPDF(player, obs) {
   y += 4
 
   // Radar chart
-  drawRadar(doc, obs, pageW / 2, y + 40, 30)
+  drawRadar(doc, obs, pageW / 2, y + 40, 30, TIPSS_CONFIG)
   y += 88
 
   // TIPSS detail
