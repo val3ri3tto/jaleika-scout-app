@@ -238,16 +238,11 @@ export async function exportPDF(player, obs) {
   }
 
   // Header
-  doc.setTextColor(...COLORS.accent)
-  doc.setFontSize(22)
-  doc.setFont('helvetica', 'bold')
-  doc.text('JALEIKA PLAYER LAB', 60, y + 4)
-  y += 10
   doc.setFontSize(12)
   doc.setFont('helvetica', 'normal')
   doc.setTextColor(...COLORS.gray)
-  doc.text('Report Osservazione', 60, y)
-  y += 12
+  doc.text('Report Osservazione', 60, y + 6)
+  y += 18
 
   // Divider
   doc.setDrawColor(...COLORS.accent)
